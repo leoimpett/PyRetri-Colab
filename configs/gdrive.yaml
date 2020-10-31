@@ -14,7 +14,7 @@ datasets:
 
   # a list of data augmentation functions.
   transformers:
-    names: ["PadResize", "ToTensor", "Normalize"]  # names of transformers.
+    names: ["TwoFlip", "CenterCrop", "ToTensor", "Normalize"]  # names of transformers.
     PadResize:
       size: 224  # target size of the longer edge.
     Normalize:
@@ -42,7 +42,7 @@ extract:
 
   # a list of pooling functions.
   aggregators:
-    names: ["GeM"]  # names of aggregators.
+    names: ["CroW"]  # names of aggregators.
 
 index:
   # path of the query set features and gallery set features.
@@ -51,7 +51,7 @@ index:
 
   # name of the features to be loaded. It should be "output feature map" + "_" + "aggregation".
   # If there are multiple elements in the list, they will be concatenated on the channel-wise.
-  feature_names: ["pool5_GeM"]
+  feature_names: ["pool5_CroW"]
 
   # a list of dimension process functions.
   dim_processors:
@@ -62,17 +62,24 @@ index:
       train_fea_dir: "data/features/gdrive"  # path of the features for training PCA.
       l2: True  # whether do l2-normalization on the training features.
 
-  # function for enhancing the quality of features.
   feature_enhancer:
-    name: "Identity"  # name of the feature enhancer.
+    name: "k-reciprocal"
+    DBA:
+      enhance_k: 10  # number of the nearest points to be calculated.
 
   # function for calculating the distance between query features and gallery features.
   metric:
     name: "KNN"  # name of the metric.
 
-  # function for re-ranking the results.
+
   re_ranker:
-    name: "Identity"  # name of the re-ranker.
+    name: "QEKR"
+    QEKR:
+      qe_times: 1  # number of query expansion times.
+      qe_k: 10  # number of the neighbors to be combined.
+      k1: 20  # hyper-parameter for calculating jaccard distance.
+      k2: 6  # hyper-parameter for calculating local query expansion.
+      lambda_value: 0.3  # hyper-parameter for calculating the final distance.
 
 evaluate:
   # function for evaluating results.
